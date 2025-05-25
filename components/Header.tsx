@@ -13,8 +13,9 @@ const Header = ({ session }: { session: Session }) => {
 
   return (
     <header className="my-10 flex items-center justify-between gap-5">
-      <Link href="/">
+      <Link href="/" className="flex items-center gap-2">
         <Image src="/icons/logo.svg" width={40} height={40} alt="site-logo" />
+        <span className="font-bold text-2xl text-gray-50">BookWise</span>
       </Link>
 
       <ul className="flex flex-row items-center gap-8">
@@ -26,7 +27,7 @@ const Header = ({ session }: { session: Session }) => {
               pathname === "/library" ? "text-light-200" : "text-light-100"
             )}
           >
-            library
+            Library
           </Link>
         </li>
 

@@ -11,7 +11,7 @@ const Home = async () => {
       <BookOverview {...sampleBooks[0]} />
       <BookList
         title="Latest Books"
-        books={sampleBooks}
+        books={sampleBooks.slice(1)}
         containerClassName="mt-28"
       />
     </>
