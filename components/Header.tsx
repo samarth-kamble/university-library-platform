@@ -1,26 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { cn, getInitials } from "@/lib/utils";
 import Image from "next/image";
-
 import { Session } from "next-auth";
+import { usePathname } from "next/navigation";
+
 import Avatar from "./Avatar";
+import { cn } from "@/lib/utils";
 
 const Header = ({ session }: { session: Session }) => {
   const pathname = usePathname();
 
   return (
-    <header className="my-10 flex justify-between gap-5">
+    <header className="my-10 flex items-center justify-between gap-5">
       <Link href="/">
-        <Image
-          src="/icons/logo.svg"
-          alt="BookWise Logo"
-          width={40}
-          height={40}
-        />
+        <Image src="/icons/logo.svg" width={40} height={40} alt="site-logo" />
       </Link>
+
       <ul className="flex flex-row items-center gap-8">
         <li>
           <Link
@@ -30,11 +26,12 @@ const Header = ({ session }: { session: Session }) => {
               pathname === "/library" ? "text-light-200" : "text-light-100"
             )}
           >
-            Library
+            library
           </Link>
         </li>
+
         <li>
-          <Link href={"/my-profile"}>
+          <Link href="/my-profile">
             <Avatar name={session?.user?.name || ""} />
           </Link>
         </li>
@@ -42,4 +39,5 @@ const Header = ({ session }: { session: Session }) => {
     </header>
   );
 };
+
 export default Header;
