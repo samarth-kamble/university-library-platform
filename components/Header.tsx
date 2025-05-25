@@ -2,10 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { cn, getInitials } from "@/lib/utils";
 import Image from "next/image";
 
-const Header = () => {
+import { Session } from "next-auth";
+import Avatar from "./Avatar";
+
+const Header = ({ session }: { session: Session }) => {
   const pathname = usePathname();
 
   return (
@@ -28,6 +31,11 @@ const Header = () => {
             )}
           >
             Library
+          </Link>
+        </li>
+        <li>
+          <Link href={"/my-profile"}>
+            <Avatar name={session?.user?.name || ""} />
           </Link>
         </li>
       </ul>
