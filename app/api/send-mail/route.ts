@@ -1,4 +1,3 @@
-// app/api/email/send/route.ts
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import config from "@/lib/config";
@@ -17,7 +16,7 @@ export async function POST(req: Request) {
 
   try {
     await transporter.sendMail({
-      from: `"BookWise - Library " <${process.env.SMTP_MAIL}>`,
+      from: `"BookWise - Library " <${config.env.smtp.mail}>`,
       to: email,
       subject,
       html: message,
