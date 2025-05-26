@@ -7,10 +7,8 @@ export async function POST(req: Request) {
   const { email, subject, message } = await req.json();
 
   const transporter = nodemailer.createTransport({
-    host: config.env.smtp.host,
-    port: config.env.smtp.port,
+    service: "gmail",
     secure: true,
-    service: config.env.smtp.service,
     auth: {
       user: config.env.smtp.mail,
       pass: config.env.smtp.password,
