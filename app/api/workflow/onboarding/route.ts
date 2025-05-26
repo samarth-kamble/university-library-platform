@@ -9,7 +9,7 @@ import { sendEmail } from "@/lib/workflow";
 type UserState = "non-active" | "active";
 type InitialData = {
   email: string;
-  fullname: string;
+  fullName: string;
 };
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000; // 1 day in milliseconds
@@ -37,15 +37,15 @@ const getUserState = async (email: string): Promise<UserState> => {
 };
 
 export const { POST } = serve<InitialData>(async (context) => {
-  const { email, fullname } = context.requestPayload;
+  const { email, fullName } = context.requestPayload;
 
-  console.log("WORKFLOW PAYLOAD", email, fullname);
+  console.log("WORKFLOW PAYLOAD", email, fullName);
 
   await context.run("new-signup", async () => {
     await sendEmail({
       email,
       subject: "Welcome to the platform",
-      message: `Hi ${fullname}, welcome to the platform!`,
+      message: `Hi ${fullName}, welcome to the platform!`,
     });
   });
 
@@ -62,7 +62,7 @@ export const { POST } = serve<InitialData>(async (context) => {
         await sendEmail({
           email,
           subject: "Hmm, it's been a while",
-          message: `Hi ${fullname}, it's been a while since you last logged in. We hope you're doing well!`,
+          message: `Hi ${fullName}, it's been a while since you last logged in. We hope you're doing well!`,
         });
       });
     } else if (state === "active") {
@@ -70,7 +70,7 @@ export const { POST } = serve<InitialData>(async (context) => {
         await sendEmail({
           email,
           subject: "Woah, you're still here!",
-          message: `Hi ${fullname}, it's good to see you active and learning new things!`,
+          message: `Hi ${fullName}, it's good to see you active and learning new things!`,
         });
       });
     }

@@ -1,4 +1,4 @@
-import { Client as Qstash, resend } from "@upstash/qstash";
+import { Client as Qstash } from "@upstash/qstash";
 import { Client as WorkflowClient } from "@upstash/workflow";
 
 import config from "./config";
