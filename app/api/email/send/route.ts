@@ -1,18 +1,19 @@
 // app/api/email/send/route.ts
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+import config from "@/lib/config";
 
 export async function POST(req: Request) {
   const { email, subject, message } = await req.json();
 
   const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT || "465", 10),
+    host: config.env.smtp.host,
+    port: config.env.smtp.port,
     secure: true,
-    service: process.env.SMTP_SERVICE,
+    service: config.env.smtp.service,
     auth: {
-      user: process.env.SMTP_MAIL,
-      pass: process.env.SMTP_PASSWORD,
+      user: config.env.smtp.mail,
+      pass: config.env.smtp.password,
     },
   });
 
