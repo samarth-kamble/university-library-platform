@@ -18,7 +18,7 @@ const config = {
       host: process.env.SMTP_HOST!,
       port: parseInt(process.env.SMTP_PORT || "465"),
       service: process.env.SMTP_SERVICE!,
-      mail: process.env.SMTP_MAIL!,
+      mail: process.env.SMTP_USER!,
       password: process.env.SMTP_PASSWORD!,
     },
   },
