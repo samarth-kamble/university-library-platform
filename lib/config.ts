@@ -15,6 +15,9 @@ const config = {
       qstashToken: process.env.QSTASH_TOKEN,
     },
     smtp: {
+      host: process.env.SMTP_HOST!,
+      port: parseInt(process.env.SMTP_PORT || "465"),
+      service: process.env.SMTP_SERVICE!,
       mail: process.env.SMTP_MAIL!,
       password: process.env.SMTP_PASSWORD!,
     },
