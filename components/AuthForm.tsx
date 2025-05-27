@@ -25,7 +25,6 @@ import {
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { FIELD_NAMES, FIELD_TYPES } from "@/constants";
-import ImageUpload from "./FileUpload";
 import FileUpload from "./FileUpload";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
