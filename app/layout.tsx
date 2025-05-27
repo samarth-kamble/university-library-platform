@@ -25,6 +25,9 @@ export const metadata: Metadata = {
   title: "BookWise",
   description:
     "BookWise is a book borrowing university library management solution.",
+  icons: {
+    icon: "/public/icons/logo.svg",
+  },
 };
 
 const RootLayout = async ({

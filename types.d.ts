@@ -6,8 +6,8 @@ interface Book {
   rating: number;
   totalCopies: number;
   availableCopies: number;
-  description: string;
   coverColor: string;
+  description?: string;
   coverUrl: string;
   videoUrl: string;
   summary: string;
