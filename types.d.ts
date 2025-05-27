@@ -34,3 +34,26 @@ interface BookParams {
   videoUrl: string;
   summary: string;
 }
+
+interface QueryParams {
+  query?: string;
+  sort?: string;
+  page?: number;
+  limit?: number;
+}
+
+interface PageProps {
+  searchParams: Promise<{
+    query?: string;
+    sort?: string;
+    page?: number;
+  }>;
+  params: Promise<{ id: string }>;
+}
+
+interface QueryParams {
+  query?: string;
+  sort?: string;
+  page?: number;
+  limit?: number;
+}
