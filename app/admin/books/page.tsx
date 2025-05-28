@@ -39,7 +39,7 @@ const AllBooks = async ({ searchParams }: PageProps) => {
         <Table className="overflow-hidden">
           <TableHeader>
             <TableRow className="h-14 border-none bg-light-300">
-              <TableHead className="w-[500px]">Book Title</TableHead>
+              <TableHead className="w-[450px]">Book Title</TableHead>
               <TableHead>Author</TableHead>
               <TableHead>Genre</TableHead>
               <TableHead>Date Created</TableHead>
@@ -89,13 +89,15 @@ const AllBooks = async ({ searchParams }: PageProps) => {
                           alt="edit"
                         />
                       </Link>
-                      <Image
-                        src="/icons/admin/trash.svg"
-                        width={20}
-                        height={20}
-                        className="object-contain"
-                        alt="delete"
-                      />
+                      <Button variant={"ghost"}>
+                        <Image
+                          src="/icons/admin/trash.svg"
+                          width={20}
+                          height={20}
+                          className="object-contain"
+                          alt="delete"
+                        />
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
