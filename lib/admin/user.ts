@@ -1,6 +1,10 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { or, desc, asc, count, eq, ilike } from "drizzle-orm";
+
 import { db } from "@/database/drizzle";
 import { borrowRecords, users } from "@/database/schema";
-import { count, desc, eq, ilike, or } from "drizzle-orm";
 
 const ITEMS_PER_PAGE = 20;
 
@@ -20,20 +24,23 @@ export async function getUsers({
 
     const sortOptions: Record<string, any> = {
       newest: desc(users.createdAt),
-      oldest: users.createdAt,
+      oldest: asc(users.createdAt),
     };
 
     const sortingCondition = sortOptions[sort] || desc(users.createdAt);
 
-    const userData = await db
+    const usersData = await db
       .select({
         user: users,
         totalBorrowedBooks: count(borrowRecords.id).as("totalBorrowedBooks"),
       })
       .from(users)
-      .leftJoin(borrowRecords, eq(borrowRecords.userId, users.id))
+      .leftJoin(
+        borrowRecords,
+        eq(borrowRecords.userId, users.id) // Match borrow records to users.
+      )
       .where(searchConditions)
-      .groupBy(users.id)
+      .groupBy(users.id) // Group by user to get borrow counts.
       .orderBy(sortingCondition)
       .limit(limit)
       .offset((page - 1) * limit);
@@ -50,7 +57,7 @@ export async function getUsers({
 
     return {
       success: true,
-      data: userData,
+      data: usersData,
       metadata: {
         totalPages,
         hasNextPage,
@@ -61,6 +68,30 @@ export async function getUsers({
     return {
       success: false,
       error: "An error occurred while fetching users",
+    };
+  }
+}
+
+export async function updateAccountStatus(params: UpdateAccountStatusParams) {
+  const { userId, status } = params;
+
+  try {
+    const updatedUser = await db
+      .update(users)
+      .set({ status })
+      .where(eq(users.id, userId))
+      .returning();
+
+    revalidatePath("/admin/account-requests");
+    return {
+      success: true,
+      data: updatedUser,
+    };
+  } catch (error) {
+    console.error("Error updating user status:", error);
+    return {
+      success: false,
+      error: "An error occurred while updating user status",
     };
   }
 }
