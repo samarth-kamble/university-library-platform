@@ -12,3 +12,10 @@ export const getInitials = (name: string): string =>
     .join("")
     .toUpperCase()
     .slice(0, 2);
+
+export const formatDate = (date: string | Date) =>
+  new Date(date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
