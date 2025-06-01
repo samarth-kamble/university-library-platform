@@ -62,6 +62,8 @@ const Page = async ({ searchParams }: PageProps) => {
                       label="Change Role"
                       initialValue={user.role!.toLowerCase()}
                       items={userRoles}
+                      userId={user.id}
+                      userName={user.fullName}
                     />
                   </TableCell>
 

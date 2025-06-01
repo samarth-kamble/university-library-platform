@@ -12,7 +12,7 @@ import { workflowClient } from "../workflow";
 import config from "../config";
 
 export const signInWithCredentials = async (
-  params: Pick<AuthCredentials, "email" | "password">
+  params: Pick<AuthCredentails, "email" | "password">
 ) => {
   const { email, password } = params;
 
@@ -39,7 +39,7 @@ export const signInWithCredentials = async (
   }
 };
 
-export const signUp = async (params: AuthCredentials) => {
+export const signUp = async (params: AuthCredentails) => {
   const { fullName, email, password, universityId, universityCard } = params;
 
   // Rate Limiting with upstash

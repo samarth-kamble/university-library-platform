@@ -25,7 +25,7 @@ interface Props {
   initialValue: string;
   items: MenuItem[];
   borrowRecordId: string;
-  onStatusChange?: () => void; // ADD THIS LINE - optional callback prop
+  onStatusChange?: () => void;
 }
 
 const BorrowStatusMenu = ({
@@ -33,12 +33,26 @@ const BorrowStatusMenu = ({
   initialValue,
   items,
   borrowRecordId,
-  onStatusChange, // ADD THIS LINE - destructure the new prop
+  onStatusChange,
 }: Props) => {
   const { toast } = useToast();
   const [activeItem, setActiveItem] = useState(initialValue);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+
+  // Updated status colors
+  const getStatusColors = (value: string) => {
+    switch (value.toLowerCase()) {
+      case "borrowed":
+        return { bgColor: "#3B82F6", textColor: "#FFFFFF" }; // Blue background
+      case "returned":
+        return { bgColor: "#10B981", textColor: "#FFFFFF" }; // Green background
+      case "overdue":
+        return { bgColor: "#EF4444", textColor: "#FFFFFF" }; // Red background
+      default:
+        return { bgColor: "#6B7280", textColor: "#FFFFFF" }; // Gray background
+    }
+  };
 
   const handleItemClick = (value: string) => {
     if (value === activeItem) return;
@@ -57,7 +71,6 @@ const BorrowStatusMenu = ({
             description: `Borrow status changed to ${value}`,
           });
 
-          // MODIFY THIS SECTION - Call callback if provided, otherwise use router.refresh
           if (onStatusChange) {
             onStatusChange();
           } else {
@@ -83,6 +96,7 @@ const BorrowStatusMenu = ({
 
   const activeMenuItem =
     items.find((item) => item.value === activeItem) || items[0];
+  const activeColors = getStatusColors(activeItem);
 
   return (
     <DropdownMenu>
@@ -90,8 +104,8 @@ const BorrowStatusMenu = ({
         <button
           className="capitalize w-fit text-center text-sm font-medium px-5 py-1 rounded-full outline-none ring-0 focus:ring-0 disabled:opacity-50"
           style={{
-            backgroundColor: activeMenuItem.bgColor,
-            color: activeMenuItem.textColor,
+            backgroundColor: activeColors.bgColor,
+            color: activeColors.textColor,
           }}
           disabled={isPending}
         >
@@ -101,23 +115,26 @@ const BorrowStatusMenu = ({
       <DropdownMenuContent className="w-36">
         <DropdownMenuLabel>{label}</DropdownMenuLabel>
         <DropdownMenuSeparator className="mb-2" />
-        {items.map((item) => (
-          <DropdownMenuItem
-            key={item.value}
-            onClick={() => handleItemClick(item.value)}
-            disabled={isPending || item.value === activeItem}
-          >
-            <p
-              className="capitalize w-fit text-center text-sm font-medium px-5 py-1 rounded-full"
-              style={{
-                backgroundColor: item.bgColor,
-                color: item.textColor,
-              }}
+        {items.map((item) => {
+          const itemColors = getStatusColors(item.value);
+          return (
+            <DropdownMenuItem
+              key={item.value}
+              onClick={() => handleItemClick(item.value)}
+              disabled={isPending || item.value === activeItem}
             >
-              {item.label}
-            </p>
-          </DropdownMenuItem>
-        ))}
+              <p
+                className="capitalize w-fit text-center text-sm font-medium px-5 py-1 rounded-full"
+                style={{
+                  backgroundColor: itemColors.bgColor,
+                  color: itemColors.textColor,
+                }}
+              >
+                {item.label}
+              </p>
+            </DropdownMenuItem>
+          );
+        })}
       </DropdownMenuContent>
     </DropdownMenu>
   );

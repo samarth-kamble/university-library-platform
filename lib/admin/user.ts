@@ -5,6 +5,7 @@ import { or, desc, asc, count, eq, ilike } from "drizzle-orm";
 
 import { db } from "@/database/drizzle";
 import { borrowRecords, users } from "@/database/schema";
+import { auth } from "@/auth";
 
 const ITEMS_PER_PAGE = 20;
 
@@ -92,6 +93,100 @@ export async function updateAccountStatus(params: UpdateAccountStatusParams) {
     return {
       success: false,
       error: "An error occurred while updating user status",
+    };
+  }
+}
+
+// Define the parameters interface
+interface ChangeUserRoleParams {
+  userId: string;
+  newRole: "USER" | "ADMIN";
+}
+
+export async function changeUserRole(params: ChangeUserRoleParams) {
+  const { userId, newRole } = params;
+
+  try {
+    // Get the current user's session
+    const session = await auth();
+
+    if (!session?.user?.id) {
+      return {
+        success: false,
+        error: "Authentication required",
+      };
+    }
+
+    // Check if the current user is an admin
+    const currentUser = await db
+      .select({
+        role: users.role,
+      })
+      .from(users)
+      .where(eq(users.id, session.user.id))
+      .limit(1);
+
+    if (!currentUser.length || currentUser[0].role !== "ADMIN") {
+      return {
+        success: false,
+        error: "Unauthorized: Only admins can change user roles",
+      };
+    }
+
+    // Prevent admin from changing their own role (optional security measure)
+    if (userId === session.user.id) {
+      return {
+        success: false,
+        error: "You cannot change your own role",
+      };
+    }
+
+    // Check if target user exists
+    const targetUser = await db
+      .select({
+        id: users.id,
+        fullName: users.fullName,
+        role: users.role,
+      })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    if (!targetUser.length) {
+      return {
+        success: false,
+        error: "User not found",
+      };
+    }
+
+    // Update the user's role
+    const updatedUser = await db
+      .update(users)
+      .set({
+        role: newRole,
+      })
+      .where(eq(users.id, userId))
+      .returning({
+        id: users.id,
+        fullName: users.fullName,
+        email: users.email,
+        role: users.role,
+      });
+
+    // Revalidate relevant paths
+    revalidatePath("/admin/users");
+    revalidatePath("/admin/account-requests");
+
+    return {
+      success: true,
+      data: updatedUser[0],
+      message: `Successfully changed ${targetUser[0].fullName}'s role to ${newRole.toLowerCase()}`,
+    };
+  } catch (error) {
+    console.error("Error changing user role:", error);
+    return {
+      success: false,
+      error: "An error occurred while changing user role",
     };
   }
 }
