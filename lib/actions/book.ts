@@ -104,3 +104,167 @@ export async function getBorrowedBooks(userId: string) {
     };
   }
 }
+
+export async function returnBook(params: ReturnBookParams) {
+  const { borrowRecordId } = params;
+
+  try {
+    // 1. Find the borrow record with book details
+    const borrowRecord = await db
+      .select({
+        id: borrowRecords.id,
+        bookId: borrowRecords.bookId,
+        userId: borrowRecords.userId,
+        dueDate: borrowRecords.dueDate,
+        status: borrowRecords.status,
+        returnDate: borrowRecords.returnDate,
+        availableCopies: books.availableCopies,
+      })
+      .from(borrowRecords)
+      .innerJoin(books, eq(borrowRecords.bookId, books.id))
+      .where(eq(borrowRecords.id, borrowRecordId))
+      .limit(1);
+
+    if (!borrowRecord.length) {
+      return {
+        success: false,
+        error: "Borrow record not found",
+      };
+    }
+
+    const record = borrowRecord[0];
+
+    // 2. Check if book is already returned
+    if (record.status === "RETURNED") {
+      return {
+        success: false,
+        error: "Book has already been returned",
+      };
+    }
+
+    const returnDate = dayjs().toDate().toDateString();
+
+    // 3. Update the borrow record
+    await db
+      .update(borrowRecords)
+      .set({
+        returnDate,
+        status: "RETURNED",
+      })
+      .where(eq(borrowRecords.id, borrowRecordId));
+
+    // 4. Update book availability
+    await db
+      .update(books)
+      .set({
+        availableCopies: record.availableCopies + 1,
+      })
+      .where(eq(books.id, record.bookId));
+
+    // 5. Trigger workflow for return notification
+    await workflowClient.trigger({
+      url: `${config.env.prodApiEndpoint}/api/workflow/return-book`,
+      body: {
+        userId: record.userId,
+        bookId: record.bookId,
+        returnDate,
+        dueDate: record.dueDate,
+      },
+    });
+
+    return {
+      success: true,
+      data: {
+        returnDate,
+        status: "RETURNED",
+      },
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      success: false,
+      error: "Error returning book",
+    };
+  }
+}
+
+export async function updateBorrowStatus(params: UpdateBorrowStatusParams) {
+  const { borrowRecordId, status } = params;
+
+  try {
+    // Get current record
+    const currentRecord = await db
+      .select({
+        id: borrowRecords.id,
+        bookId: borrowRecords.bookId,
+        status: borrowRecords.status,
+        returnDate: borrowRecords.returnDate,
+        availableCopies: books.availableCopies,
+      })
+      .from(borrowRecords)
+      .innerJoin(books, eq(borrowRecords.bookId, books.id))
+      .where(eq(borrowRecords.id, borrowRecordId))
+      .limit(1);
+
+    if (!currentRecord.length) {
+      return {
+        success: false,
+        error: "Borrow record not found",
+      };
+    }
+
+    const record = currentRecord[0];
+    const wasReturned = record.status === "RETURNED";
+    const willBeReturned = status === "RETURNED";
+
+    // Update borrow record
+    const updateData: any = { status };
+
+    // If changing from RETURNED to BORROWED, remove return date
+    if (wasReturned && status === "BORROWED") {
+      updateData.returnDate = null;
+    }
+    // If changing from BORROWED to RETURNED, add return date
+    else if (!wasReturned && status === "RETURNED") {
+      updateData.returnDate = dayjs().toDate().toDateString();
+    }
+
+    await db
+      .update(borrowRecords)
+      .set(updateData)
+      .where(eq(borrowRecords.id, borrowRecordId));
+
+    // Update book availability based on status change
+    if (wasReturned && !willBeReturned) {
+      // Book was returned, now borrowed again - decrease available copies
+      await db
+        .update(books)
+        .set({
+          availableCopies: record.availableCopies - 1,
+        })
+        .where(eq(books.id, record.bookId));
+    } else if (!wasReturned && willBeReturned) {
+      // Book was borrowed, now returned - increase available copies
+      await db
+        .update(books)
+        .set({
+          availableCopies: record.availableCopies + 1,
+        })
+        .where(eq(books.id, record.bookId));
+    }
+
+    return {
+      success: true,
+      data: {
+        status,
+        returnDate: updateData.returnDate || record.returnDate,
+      },
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      success: false,
+      error: "Error updating borrow status",
+    };
+  }
+}

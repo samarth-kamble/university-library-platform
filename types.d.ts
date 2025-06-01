@@ -96,3 +96,27 @@ interface UpdateAccountStatusParams {
 interface UpdateBookParams extends BookParams {
   bookId: string;
 }
+
+interface UpdateBookParams {
+  bookId: string;
+  title?: string;
+  author?: string;
+  genre?: string;
+  rating?: number;
+  coverUrl?: string;
+  coverColor?: string;
+  description?: string;
+  totalCopies?: number;
+  availableCopies?: number;
+  videoUrl?: string;
+  summary?: string;
+}
+
+interface ReturnBookParams {
+  borrowRecordId: string;
+}
+
+interface UpdateBorrowStatusParams {
+  borrowRecordId: string;
+  status: "BORROWED" | "RETURNED" | "OVERDUE";
+}
