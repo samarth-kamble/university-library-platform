@@ -190,3 +190,58 @@ export async function getBorrowRecords({
     };
   }
 }
+
+export async function deleteBook({ id }: { id: string }) {
+  try {
+    // First check if the book exists
+    const existingBook = await db
+      .select()
+      .from(books)
+      .where(eq(books.id, id))
+      .limit(1);
+
+    if (!existingBook.length) {
+      return {
+        success: false,
+        error: "Book not found",
+      };
+    }
+
+    // Check if there are any active borrow records for this book
+    const activeBorrowRecords = await db
+      .select()
+      .from(borrowRecords)
+      .where(
+        and(
+          eq(borrowRecords.bookId, id),
+          eq(borrowRecords.status, "BORROWED") // Assuming you have a status field
+        )
+      )
+      .limit(1);
+
+    if (activeBorrowRecords.length > 0) {
+      return {
+        success: false,
+        error: "Cannot delete book with active borrow records",
+      };
+    }
+
+    // Delete the book
+    const deletedBook = await db
+      .delete(books)
+      .where(eq(books.id, id))
+      .returning();
+
+    return {
+      success: true,
+      data: JSON.parse(JSON.stringify(deletedBook[0])),
+      message: "Book deleted successfully",
+    };
+  } catch (error) {
+    console.error("Error deleting book:", error);
+    return {
+      success: false,
+      error: "Error deleting book",
+    };
+  }
+}
