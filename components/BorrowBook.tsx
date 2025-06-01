@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "./ui/button";
 import { toast } from "@/hooks/use-toast";
+import { borrowBook } from "@/lib/actions/book";
 
 interface Props {
   userId: string;
@@ -20,8 +21,44 @@ const BorrowBook = ({ userId, bookId, borrowingEligibility }: Props) => {
   const router = useRouter();
   const [borrowing, setBorrowing] = useState(false);
 
-  //   Implement the borrowing logic here
-  const handleBorrowBook = async () => {};
+  const handleBorrowBook = async () => {
+    if (!borrowingEligibility.isEligible) {
+      toast({
+        title: "Error",
+        description: borrowingEligibility.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setBorrowing(true);
+    try {
+      const result = await borrowBook({ bookId, userId });
+      if (result.success) {
+        toast({
+          title: "Success",
+          description: "Book borrowed successfully.",
+        });
+
+        router.push("/my-profile");
+      } else {
+        toast({
+          title: "Error",
+          description: result.error,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+
+      toast({
+        title: "Error",
+        description: "Failed to borrow book.",
+      });
+    } finally {
+      setBorrowing(false);
+    }
+  };
 
   return (
     <Button
@@ -29,13 +66,7 @@ const BorrowBook = ({ userId, bookId, borrowingEligibility }: Props) => {
       onClick={handleBorrowBook}
       disabled={borrowing}
     >
-      <Image
-        src="/icons/book.svg"
-        className="-mt-1"
-        alt="book"
-        width={20}
-        height={20}
-      />
+      <Image src="/icons/book.svg" alt="book" width={20} height={20} />
 
       <p className="font-bebas-neue text-xl text-dark-100">
         {borrowing ? "Borrowing..." : "Borrow Book Request"}

@@ -1,14 +1,20 @@
 import { auth, signOut } from "@/auth";
 import Avatar from "@/components/Avatar";
+import BookList from "@/components/BookList";
 import { Button } from "@/components/ui/button";
 import { db } from "@/database/drizzle";
 import { users } from "@/database/schema";
+import { getBorrowedBooks } from "@/lib/actions/book";
 import config from "@/lib/config";
 import { eq } from "drizzle-orm";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import React, { use } from "react";
 
+interface BorrowedBookProps {
+  data: BorrowedBook[];
+  success: boolean;
+}
 const MyProfilePage = async () => {
   const session = await auth();
   if (!session?.user?.id) return;
@@ -18,6 +24,14 @@ const MyProfilePage = async () => {
     .from(users)
     .where(eq(users.id, session?.user?.id))
     .limit(1);
+
+  if (!user) redirect("/404");
+
+  const { data: borrowedBooks, success } = (await getBorrowedBooks(
+    session?.user?.id
+  )) as BorrowedBookProps;
+
+  if (!success) redirect("/404");
 
   return (
     <>
@@ -86,7 +100,17 @@ const MyProfilePage = async () => {
             </Button>
           </form>
         </div>
-        <div className="flex-1">{/* Maps a borrowed Book */}</div>
+        <div className="flex-1">
+          {success && borrowedBooks.length > 0 ? (
+            <BookList
+              title="Borrowed Books"
+              books={borrowedBooks}
+              isBorrowed={true}
+            />
+          ) : (
+            <div className="flex-1">No borrowed books</div>
+          )}
+        </div>
       </section>
     </>
   );

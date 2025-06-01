@@ -33,7 +33,7 @@ const Page = async ({ searchParams }: PageProps) => {
         <Table className="overflow-hidden">
           <TableHeader>
             <TableRow className="h-14 border-none bg-light-300">
-              <TableHead className="w-96">Name</TableHead>
+              <TableHead className="w-72">Name</TableHead>
               <TableHead>Date Joined</TableHead>
               <TableHead>University ID No</TableHead>
               <TableHead>University ID Card</TableHead>
