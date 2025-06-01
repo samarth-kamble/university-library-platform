@@ -268,3 +268,65 @@ export async function updateBorrowStatus(params: UpdateBorrowStatusParams) {
     };
   }
 }
+
+export async function searchBooks({
+  query,
+  sort = "available",
+  page = 1,
+}: {
+  query?: string;
+  sort?: string;
+  page?: number;
+}) {
+  try {
+    const searchConditions = query
+      ? or(
+          ilike(books.title, `%${query}%`),
+          ilike(books.genre, `%${query}%`),
+          ilike(books.author, `%${query}%`)
+        )
+      : undefined;
+
+    const sortOptions: { [key: string]: any } = {
+      newest: desc(books.createdAt),
+      oldest: asc(books.createdAt),
+      highestRated: desc(books.rating),
+      available: desc(books.totalCopies),
+    };
+
+    const sortingCondition = sortOptions[sort] || desc(books.totalCopies);
+
+    const allBooks = await db
+      .select()
+      .from(books)
+      .where(searchConditions)
+      .orderBy(sortingCondition)
+      .limit(ITEMS_PER_PAGE)
+      .offset((page - 1) * ITEMS_PER_PAGE);
+
+    const totalBooks = await db
+      .select({
+        count: count(),
+      })
+      .from(books)
+      .where(searchConditions);
+
+    const totalPage = Math.ceil(totalBooks[0].count / ITEMS_PER_PAGE);
+    const hasNextPage = page < totalPage;
+
+    return {
+      success: true,
+      data: JSON.parse(JSON.stringify(allBooks)),
+      metadata: {
+        totalPage,
+        hasNextPage,
+      },
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      success: false,
+      error: "Error searching books",
+    };
+  }
+}

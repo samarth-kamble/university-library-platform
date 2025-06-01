@@ -18,7 +18,18 @@ const Header = ({ session }: { session: Session }) => {
         <span className="font-bold text-2xl text-gray-50">BookWise</span>
       </Link>
 
-      <ul className="flex flex-row items-center gap-8">
+      <ul className="flex flex-row items-center gap-8 font-bold">
+        <li>
+          <Link
+            href="/"
+            className={cn(
+              "text-base cursor-pointer capitalize",
+              pathname === "/" ? "text-light-200" : "text-light-100"
+            )}
+          >
+            Home
+          </Link>
+        </li>
         <li>
           <Link
             href="/library"
