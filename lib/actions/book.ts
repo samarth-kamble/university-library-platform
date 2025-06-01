@@ -23,26 +23,6 @@ export async function borrowBook(params: BorrowBookParams) {
   const { userId, bookId } = params;
 
   try {
-    // Check if user already has this book borrowed
-    const existingBorrow = await db
-      .select()
-      .from(borrowRecords)
-      .where(
-        and(
-          eq(borrowRecords.userId, userId),
-          eq(borrowRecords.bookId, bookId),
-          eq(borrowRecords.status, "BORROWED")
-        )
-      )
-      .limit(1);
-
-    if (existingBorrow.length > 0) {
-      return {
-        success: false,
-        error: "You have already borrowed this book",
-      };
-    }
-
     const book = await db
       .select({
         availableCopies: books.availableCopies,
