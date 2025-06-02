@@ -12,9 +12,6 @@ import {
 } from "../ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { changeUserRole } from "@/lib/admin/user";
-import { DefaultSession } from "next-auth";
-
-// Import your server action
 
 interface MenuItem {
   value: string;

@@ -120,3 +120,8 @@ interface UpdateBorrowStatusParams {
   borrowRecordId: string;
   status: "BORROWED" | "RETURNED" | "OVERDUE";
 }
+
+interface ChangeUserRoleParams {
+  userId: string;
+  newRole: "USER" | "ADMIN";
+}

@@ -4,8 +4,8 @@ import { revalidatePath } from "next/cache";
 import { or, desc, asc, count, eq, ilike } from "drizzle-orm";
 
 import { db } from "@/database/drizzle";
-import { borrowRecords, users } from "@/database/schema";
 import { auth } from "@/auth";
+import { borrowRecords, users, books } from "@/database/schema";
 
 const ITEMS_PER_PAGE = 20;
 
@@ -97,12 +97,6 @@ export async function updateAccountStatus(params: UpdateAccountStatusParams) {
   }
 }
 
-// Define the parameters interface
-interface ChangeUserRoleParams {
-  userId: string;
-  newRole: "USER" | "ADMIN";
-}
-
 export async function changeUserRole(params: ChangeUserRoleParams) {
   const { userId, newRole } = params;
 
@@ -187,6 +181,60 @@ export async function changeUserRole(params: ChangeUserRoleParams) {
     return {
       success: false,
       error: "An error occurred while changing user role",
+    };
+  }
+}
+
+export async function getUserById(userId: string) {
+  try {
+    const userData = await db
+      .select({
+        user: users,
+        totalBorrowedBooks: count(borrowRecords.id).as("totalBorrowedBooks"),
+      })
+      .from(users)
+      .leftJoin(borrowRecords, eq(borrowRecords.userId, users.id))
+      .where(eq(users.id, userId))
+      .groupBy(users.id)
+      .limit(1);
+
+    if (!userData.length) {
+      return {
+        success: false,
+        error: "User not found",
+      };
+    }
+
+    // Import the books table from your schema
+
+    // Get user's borrowing history with book titles
+    const borrowingHistory = await db
+      .select({
+        id: borrowRecords.id,
+        bookTitle: books, // Get title from books table
+        borrowDate: borrowRecords.borrowDate,
+        dueDate: borrowRecords.dueDate,
+        returnDate: borrowRecords.returnDate,
+        status: borrowRecords.status,
+      })
+      .from(borrowRecords)
+      .leftJoin(books, eq(borrowRecords.bookId, books.id))
+      .where(eq(borrowRecords.userId, userId))
+      .orderBy(desc(borrowRecords.borrowDate))
+      .limit(10);
+
+    return {
+      success: true,
+      data: {
+        ...userData[0],
+        borrowingHistory,
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching user by ID:", error);
+    return {
+      success: false,
+      error: "An error occurred while fetching user details",
     };
   }
 }

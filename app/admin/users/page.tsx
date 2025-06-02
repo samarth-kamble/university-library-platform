@@ -16,6 +16,8 @@ import Pagination from "@/components/Pagination";
 import { getUsers } from "@/lib/admin/user";
 import Menu from "@/components/admin/Menu";
 import { userRoles } from "@/constants";
+import { Button } from "@/components/ui/button";
+import { Info } from "lucide-react";
 
 const Page = async ({ searchParams }: PageProps) => {
   const { query, sort, page } = await searchParams;
@@ -91,13 +93,14 @@ const Page = async ({ searchParams }: PageProps) => {
                     {totalBorrowedBooks}
                   </TableCell>
                   <TableCell className="flex justify-center">
-                    <Image
-                      src="/icons/admin/trash.svg"
-                      width={20}
-                      height={20}
-                      className="object-contain"
-                      alt="delete"
-                    />
+                    <Button variant="ghost" size="icon">
+                      <Link
+                        href={`/admin/users/${user.id}`}
+                        className="flex items-center justify-center gap-1.5"
+                      >
+                        <Info />
+                      </Link>
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))
