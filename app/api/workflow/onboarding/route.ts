@@ -4,6 +4,7 @@ import { serve } from "@upstash/workflow/nextjs";
 import { db } from "@/database/drizzle";
 import { users } from "@/database/schema";
 import WelcomeEmailTemplate from "@/components/admin/email/WelcomeEmailTemplate";
+import WeMissYouEmailTemplate from "@/components/admin/email/WeMissYout";
 
 type UserState = "non-active" | "active";
 type InitialData = {
@@ -100,7 +101,7 @@ export const { POST } = serve<InitialData>(async (context) => {
         await sendEmail({
           email,
           subject: "Hmm, it's been a while",
-          message: `<p>Hi ${fullName}, it's been a while since you last logged in. We hope you're doing well!</p>`,
+          message: WeMissYouEmailTemplate(fullName),
         });
       });
     } else if (state === "active") {

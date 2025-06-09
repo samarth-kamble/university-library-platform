@@ -5,6 +5,7 @@ import { serve } from "@upstash/workflow/nextjs";
 import { db } from "@/database/drizzle";
 import { sendEmail } from "@/lib/workflow";
 import { borrowRecords, users, books } from "@/database/schema";
+import BookBorrowedEmailTemplate from "@/components/admin/email/BookBorrowedEmailTemplate";
 
 type BorrowEventData = {
   userId: string;
@@ -66,7 +67,12 @@ export const { POST } = serve<BorrowEventData>(async (context) => {
     await sendEmail({
       email,
       subject: `You borrowed "${title}"!`,
-      message: `Hi ${fullName},\n\nYou've successfully borrowed the book "${title}". Enjoy your reading! The due date is ${dueDate}.`,
+      message: BookBorrowedEmailTemplate({
+        fullName,
+        bookTitle: title,
+        borrowDate,
+        dueDate,
+      }),
     });
   });
 
